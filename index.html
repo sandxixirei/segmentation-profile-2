@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tu perfil | Curated Fashionista</title>
+
+  <style>
+
+    /* ------------------------------
+       CONFIGURACIÓN GENERAL
+    ------------------------------ */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f3f0ea;
+      color: #111111;
+    }
+
+
+    /* ------------------------------
+       CONTENEDOR PRINCIPAL
+    ------------------------------ */
+
+    .profile-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .profile-card {
+      width: 100%;
+      max-width: 850px;
+      background-color: #ffffff;
+      text-align: center;
+      padding: 70px 60px;
+    }
+
+
+    /* ------------------------------
+       CABECERA
+    ------------------------------ */
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 54px;
+      line-height: 1;
+      font-weight: 400;
+      letter-spacing: -2px;
+    }
+
+    .subtitle {
+      margin-top: 25px;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #555555;
+    }
+
+
+    /* ------------------------------
+       IMAGEN
+    ------------------------------ */
+
+    .image-placeholder {
+      margin: 50px auto;
+      width: 100%;
+      height: 390px;
+      background-color: #dedbd5;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: #777777;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+
+    /* ------------------------------
+       DESCRIPCIÓN
+    ------------------------------ */
+
+    .description {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .description h2 {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: normal;
+      margin-bottom: 24px;
+    }
+
+    .description p {
+      font-size: 20px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+
+    /* ------------------------------
+       ETIQUETAS
+    ------------------------------ */
+
+    .traits {
+      margin-top: 45px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .trait {
+      border: 1px solid #111111;
+      padding: 10px 16px;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+
+    /* ------------------------------
+       PIE
+    ------------------------------ */
+
+    .footer {
+      margin-top: 65px;
+      padding-top: 25px;
+      border-top: 1px solid #dddddd;
+
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #777777;
+    }
+
+
+    /* ------------------------------
+       ADAPTACIÓN MÓVIL
+    ------------------------------ */
+
+    @media (max-width: 650px) {
+
+      .profile-container {
+        padding: 0;
+      }
+
+      .profile-card {
+        padding: 55px 25px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .image-placeholder {
+        height: 330px;
+        margin: 40px auto;
+      }
+
+      .description p {
+        font-size: 18px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+  <main class="profile-container">
+
+    <section class="profile-card">
+
+
+      <!-- CABECERA -->
+
+      <div class="eyebrow">
+        Tu perfil es
+      </div>
+
+      <h1>
+        CURATED<br>
+        FASHIONISTA
+      </h1>
+
+      <div class="subtitle">
+        Woman · Perfil de segmentación
+      </div>
+
+
+      <!-- IMAGEN -->
+
+      <div class="image-placeholder">
+        Imagen Curated Fashionista
+      </div>
+
+
+      <!-- DESCRIPCIÓN -->
+
+      <div class="description">
+
+        <h2>
+          Descubre tu perfil
+        </h2>
+
+        <p>
+          Has obtenido el perfil
+          <strong>Curated Fashionista</strong>.
+          Esta página es todavía una prueba visual.
+          Aquí incorporaremos la descripción definitiva
+          del segmento una vez validado el contenido.
+        </p>
+
+      </div>
+
+
+      <!-- ATRIBUTOS PROVISIONALES -->
+
+      <div class="traits">
+
+        <div class="trait">
+          Woman
+        </div>
+
+        <div class="trait">
+          Curated Fashionista
+        </div>
+
+      </div>
+
+
+      <!-- PIE -->
+
+      <div class="footer">
+        Tu perfil de estilo
+      </div>
+
+
+    </section>
+
+  </main>
+
+</body>
+
+</html>
