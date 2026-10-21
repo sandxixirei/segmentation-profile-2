@@ -1,125 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <title>Tu perfil</title>
+  <title>Diagnóstico del perfil</title>
 
   <style>
     body {
+      margin: 0;
+      padding: 40px 20px;
       font-family: Arial, Helvetica, sans-serif;
-      padding: 40px;
       background: #ffffff;
       color: #111111;
     }
 
-    #estado {
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
       font-size: 48px;
       margin-bottom: 25px;
     }
 
     #detalle {
-      font-size: 18px;
+      font-size: 20px;
+      line-height: 1.5;
     }
 
-    #debug {
-      margin-top: 40px;
-      color: #777777;
+    #diagnostico {
+      margin-top: 35px;
+      padding: 20px;
+      background: #f3f3f3;
+      border: 1px solid #dddddd;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-family: monospace;
       font-size: 13px;
+      line-height: 1.6;
     }
   </style>
 </head>
 
 <body>
+  <main>
+    <h1 id="estado">CARGANDO...</h1>
 
-  <h1 id="estado">CARGANDO...</h1>
+    <p id="detalle">
+      Estamos preparando tu perfil.
+    </p>
 
-  <p id="detalle">
-    Estamos preparando tu perfil.
-  </p>
-
-  <p id="debug"></p>
+    <div id="diagnostico">
+      Iniciando diagnóstico...
+    </div>
+  </main>
 
   <script>
-    const SUPABASE_URL =  "https://yxbxdslbqzagxdtvxcfn.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_Ot_qmXz2rmPkZik1lotE4A_STBWA9p9";
+    const SUPABASE_URL =
+      "https://yxbxdslbqzagxdtvxcfn.supabase.co";
 
-    const parametros = new URLSearchParams(window.location.search);
-    const responseId = parametros.get("responseid");
+    const SUPABASE_KEY =
+      "PEGA_AQUI_TU_PUBLISHABLE_KEY";
 
-    const estado = document.getElementById("estado");
-    const detalle = document.getElementById("detalle");
-    const debug = document.getElementById("debug");
+    const parametros =
+      new URLSearchParams(window.location.search);
+
+    const responseId =
+      parametros.get("responseid");
+
+    const estado =
+      document.getElementById("estado");
+
+    const detalle =
+      document.getElementById("detalle");
+
+    const diagnostico =
+      document.getElementById("diagnostico");
+
+    function mostrarDiagnostico(texto) {
+      diagnostico.textContent += "\n" + texto;
+    }
 
     async function obtenerPerfil() {
+      diagnostico.textContent =
+        "1. JavaScript iniciado correctamente.";
+
+      mostrarDiagnostico(
+        "2. Response ID recibido: " + responseId
+      );
 
       if (!responseId) {
-        estado.textContent = "NO SE HA RECIBIDO UN IDENTIFICADOR";
-        detalle.textContent = "";
+        estado.textContent =
+          "IDENTIFICADOR NO RECIBIDO";
+
+        detalle.textContent =
+          "La URL no contiene el parámetro responseid.";
+
+        mostrarDiagnostico(
+          "ERROR: falta responseid en la URL."
+        );
+
         return;
       }
 
-      debug.textContent = "Response ID recibido: " + responseId;
+      if (
+        !SUPABASE_KEY ||
+        SUPABASE_KEY ===
+          "sb_publishable_Ot_qmXz2rmPkZik1lotE4A_STBWA9p9"
+      ) {
+        estado.textContent =
+          "FALTA LA CLAVE DE SUPABASE";
+
+        detalle.textContent =
+          "La Publishable Key no se ha configurado.";
+
+        mostrarDiagnostico(
+          "ERROR: Publishable Key sin sustituir."
+        );
+
+        return;
+      }
+
+      const apiUrl =
+        SUPABASE_URL +
+        "/rest/v1/segment_results" +
+        "?response_id=eq." +
+        encodeURIComponent(responseId) +
+        "&select=response_id,segmento,linea,status";
+
+      mostrarDiagnostico(
+        "3. Consultando la tabla segment_results."
+      );
+
+      const controlador =
+        new AbortController();
+
+      const timeout =
+        setTimeout(function () {
+          controlador.abort();
+        }, 8000);
 
       try {
+        const respuesta =
+          await fetch(apiUrl, {
+            method: "GET",
+            headers: {
+              "apikey": SUPABASE_KEY,
+              "Accept": "application/json"
+            },
+            signal: controlador.signal
+          });
 
-        const url =
-          SUPABASE_URL +
-          "/rest/v1/segment_results" +
-          "?response_id=eq." + encodeURIComponent(responseId) +
-          "&select=response_id,segmento,linea,status";
+        clearTimeout(timeout);
 
-        const respuesta = await fetch(url, {
-          method: "GET",
-          headers: {
-            "apikey": SUPABASE_KEY
-          }
-        });
+        mostrarDiagnostico(
+          "4. Código HTTP recibido: " +
+          respuesta.status
+        );
+
+        const textoRespuesta =
+          await respuesta.text();
+
+        mostrarDiagnostico(
+          "5. Respuesta de Supabase: " +
+          textoRespuesta
+        );
 
         if (!respuesta.ok) {
-          throw new Error(
-            "Supabase respondió con código " + respuesta.status
-          );
+          estado.textContent =
+            "ERROR DE SUPABASE";
+
+          detalle.textContent =
+            "La base de datos ha rechazado la consulta.";
+
+          return;
         }
 
-        const datos = await respuesta.json();
+        const datos =
+          JSON.parse(textoRespuesta);
+
+        if (!Array.isArray(datos)) {
+          estado.textContent =
+            "RESPUESTA NO VÁLIDA";
+
+          detalle.textContent =
+            "Supabase no ha devuelto una lista.";
+
+          return;
+        }
 
         if (datos.length === 0) {
-          estado.textContent = "RESULTADO NO ENCONTRADO";
+          estado.textContent =
+            "RESULTADO NO ENCONTRADO";
+
           detalle.textContent =
-            "Todavía no existe un perfil para esta respuesta.";
+            "No existe una fila READY para " +
+            responseId +
+            ".";
+
           return;
         }
 
         const perfil = datos[0];
 
-        if (perfil.status !== "READY") {
-          estado.textContent = "CARGANDO...";
-          detalle.textContent =
-            "Estamos preparando tu perfil.";
-          return;
-        }
-
-        estado.textContent = perfil.segmento.toUpperCase();
+        estado.textContent =
+          String(perfil.segmento).toUpperCase();
 
         detalle.textContent =
           "Línea: " + perfil.linea;
 
-      } catch (error) {
+        mostrarDiagnostico(
+          "6. Perfil recuperado correctamente."
+        );
 
-        estado.textContent = "ERROR AL CARGAR EL PERFIL";
+      } catch (error) {
+        clearTimeout(timeout);
+
+        estado.textContent =
+          "ERROR DE CONEXIÓN";
 
         detalle.textContent =
-          "No hemos podido recuperar el resultado.";
+          "No se ha podido consultar Supabase.";
 
-        console.error(error);
+        mostrarDiagnostico(
+          "ERROR: " +
+          error.name +
+          " - " +
+          error.message
+        );
       }
     }
 
     obtenerPerfil();
   </script>
+</body>
+</html>
 
 </body>
 
