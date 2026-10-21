@@ -9,27 +9,39 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       max-width: 800px;
       margin: 60px auto;
       padding: 20px;
+      color: #111111;
+    }
+
+    #resultado {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    #detalle {
+      font-size: 20px;
     }
 
     #diagnostico {
-      margin-top: 30px;
+      margin-top: 35px;
       padding: 20px;
       background: #eeeeee;
+      border: 1px solid #dddddd;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.5;
     }
   </style>
 </head>
 
 <body>
 
-  <h1 id="resultado">
-    TEST SUPABASE
-  </h1>
+  <h1 id="resultado">TEST SUPABASE</h1>
 
   <p id="detalle">
     Preparando consulta...
@@ -39,7 +51,6 @@
     JavaScript todavía no iniciado.
   </div>
 
-
   <script>
 
     const SUPABASE_URL =
@@ -48,13 +59,11 @@
     const SUPABASE_KEY =
       "sb_publishable_Ot_qmXz2rmPkZik1lotE4A_STBWA9p9";
 
-
     const parametros =
       new URLSearchParams(window.location.search);
 
     const responseId =
       parametros.get("responseid");
-
 
     const resultado =
       document.getElementById("resultado");
@@ -65,16 +74,24 @@
     const diagnostico =
       document.getElementById("diagnostico");
 
-
     diagnostico.textContent =
       "PASO 1 OK - JavaScript funciona";
-
 
     async function consultarSupabase() {
 
       diagnostico.textContent +=
         "\nPASO 2 - ResponseID: " + responseId;
 
+      if (!responseId) {
+
+        resultado.textContent =
+          "FALTA RESPONSE ID";
+
+        detalle.textContent =
+          "La URL no contiene responseid.";
+
+        return;
+      }
 
       const url =
         SUPABASE_URL +
@@ -83,39 +100,33 @@
         encodeURIComponent(responseId) +
         "&select=response_id,segmento,linea,status";
 
-
       diagnostico.textContent +=
         "\nPASO 3 - Consultando Supabase";
 
+      diagnostico.textContent +=
+        "\nURL API: " + url;
 
       try {
 
         const respuesta =
           await fetch(url, {
-
             method: "GET",
-
             headers: {
               "apikey": SUPABASE_KEY,
               "Accept": "application/json"
             }
-
           });
-
 
         diagnostico.textContent +=
           "\nPASO 4 - HTTP: " +
           respuesta.status;
 
-
         const cuerpo =
           await respuesta.text();
-
 
         diagnostico.textContent +=
           "\nPASO 5 - Supabase responde: " +
           cuerpo;
-
 
         if (!respuesta.ok) {
 
@@ -126,13 +137,21 @@
             "La consulta ha sido rechazada.";
 
           return;
-
         }
-
 
         const datos =
           JSON.parse(cuerpo);
 
+        if (!Array.isArray(datos)) {
+
+          resultado.textContent =
+            "RESPUESTA NO VÁLIDA";
+
+          detalle.textContent =
+            "Supabase no ha devuelto una lista.";
+
+          return;
+        }
 
         if (datos.length === 0) {
 
@@ -140,50 +159,41 @@
             "SIN RESULTADO";
 
           detalle.textContent =
-            "No existe R_TEST_001.";
+            "No existe un resultado READY para " +
+            responseId +
+            ".";
 
           return;
-
         }
-
 
         const perfil =
           datos[0];
 
-
         resultado.textContent =
-          perfil.segmento.toUpperCase();
-
+          String(perfil.segmento).toUpperCase();
 
         detalle.textContent =
           "Línea: " +
           perfil.linea;
-
 
         diagnostico.textContent +=
           "\nPASO 6 OK - Perfil encontrado";
 
       }
 
-
       catch (error) {
 
         resultado.textContent =
           "ERROR DE CONEXIÓN";
 
-
         detalle.textContent =
           error.message;
-
 
         diagnostico.textContent +=
           "\nERROR: " +
           error.message;
-
       }
-
     }
-
 
     consultarSupabase();
 
