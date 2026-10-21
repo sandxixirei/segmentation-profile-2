@@ -13,13 +13,13 @@
   <p id="debug">Leyendo segmento...</p>
 
   <script>
-    const parametros = new URLSearchParams(window.location.search);
-    const segmento = parametros.get("segmento");
+const parametros = new URLSearchParams(window.location.search);
+const responseid = parametros.get("responseid");
 
     const resultado = document.getElementById("resultado");
     const debug = document.getElementById("debug");
 
-    debug.textContent = "Valor recibido: " + segmento;
+debug.textContent = "Response ID recibido: " + responseid;
 
     if (segmento === "CuratedFashionista") {
       resultado.textContent = "CURATED FASHIONISTA";
