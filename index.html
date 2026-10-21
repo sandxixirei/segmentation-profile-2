@@ -1,36 +1,126 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test segmento</title>
+
+  <title>Tu perfil</title>
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 40px;
+      background: #ffffff;
+      color: #111111;
+    }
+
+    #estado {
+      font-size: 48px;
+      margin-bottom: 25px;
+    }
+
+    #detalle {
+      font-size: 18px;
+    }
+
+    #debug {
+      margin-top: 40px;
+      color: #777777;
+      font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h1 id="resultado">CARGANDO...</h1>
+  <h1 id="estado">CARGANDO...</h1>
 
-  <p id="debug">Leyendo segmento...</p>
+  <p id="detalle">
+    Estamos preparando tu perfil.
+  </p>
+
+  <p id="debug"></p>
 
   <script>
-const parametros = new URLSearchParams(window.location.search);
-const responseid = parametros.get("responseid");
+    const SUPABASE_URL =  "https://yxbxdslbqzagxdtvxcfn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_Ot_qmXz2rmPkZik1lotE4A_STBWA9p9";
 
-    const resultado = document.getElementById("resultado");
+    const parametros = new URLSearchParams(window.location.search);
+    const responseId = parametros.get("responseid");
+
+    const estado = document.getElementById("estado");
+    const detalle = document.getElementById("detalle");
     const debug = document.getElementById("debug");
 
-debug.textContent = "Response ID recibido: " + responseid;
+    async function obtenerPerfil() {
 
-    if (segmento === "CuratedFashionista") {
-      resultado.textContent = "CURATED FASHIONISTA";
-    } else if (segmento === "StylishFollower") {
-      resultado.textContent = "STYLISH FOLLOWER";
-    } else if (segmento === "LuxuryRefined") {
-      resultado.textContent = "LUXURY REFINED";
-    } else {
-      resultado.textContent = "SEGMENTO NO RECONOCIDO";
+      if (!responseId) {
+        estado.textContent = "NO SE HA RECIBIDO UN IDENTIFICADOR";
+        detalle.textContent = "";
+        return;
+      }
+
+      debug.textContent = "Response ID recibido: " + responseId;
+
+      try {
+
+        const url =
+          SUPABASE_URL +
+          "/rest/v1/segment_results" +
+          "?response_id=eq." + encodeURIComponent(responseId) +
+          "&select=response_id,segmento,linea,status";
+
+        const respuesta = await fetch(url, {
+          method: "GET",
+          headers: {
+            "apikey": SUPABASE_KEY
+          }
+        });
+
+        if (!respuesta.ok) {
+          throw new Error(
+            "Supabase respondió con código " + respuesta.status
+          );
+        }
+
+        const datos = await respuesta.json();
+
+        if (datos.length === 0) {
+          estado.textContent = "RESULTADO NO ENCONTRADO";
+          detalle.textContent =
+            "Todavía no existe un perfil para esta respuesta.";
+          return;
+        }
+
+        const perfil = datos[0];
+
+        if (perfil.status !== "READY") {
+          estado.textContent = "CARGANDO...";
+          detalle.textContent =
+            "Estamos preparando tu perfil.";
+          return;
+        }
+
+        estado.textContent = perfil.segmento.toUpperCase();
+
+        detalle.textContent =
+          "Línea: " + perfil.linea;
+
+      } catch (error) {
+
+        estado.textContent = "ERROR AL CARGAR EL PERFIL";
+
+        detalle.textContent =
+          "No hemos podido recuperar el resultado.";
+
+        console.error(error);
+      }
     }
+
+    obtenerPerfil();
   </script>
 
 </body>
+
 </html>
