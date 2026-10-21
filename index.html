@@ -266,7 +266,34 @@
     </section>
 
   </main>
+<script>
 
+  const params = new URLSearchParams(window.location.search);
+
+  const segmento = params.get("segmento");
+
+  const titulo = document.getElementById("segment-title");
+
+
+  if (segmento === "CuratedFashionista") {
+
+    titulo.innerHTML = "CURATED<br>FASHIONISTA";
+
+  }
+
+  else if (segmento === "StylishFollower") {
+
+    titulo.innerHTML = "STYLISH<br>FOLLOWER";
+
+  }
+
+  else if (segmento === "LuxuryRefined") {
+
+    titulo.innerHTML = "LUXURY<br>REFINED";
+
+  }
+
+</script>
 </body>
 
 </html>
