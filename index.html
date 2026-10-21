@@ -1,73 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title>Segmentación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test segmento</title>
 </head>
-
 
 <body>
 
-  <h1 id="resultado">
-    SIN SEGMENTO
-  </h1>
+  <h1 id="resultado">CARGANDO...</h1>
 
-
-  <p id="debug">
-    Esperando parámetro...
-  </p>
-
+  <p id="debug">Leyendo segmento...</p>
 
   <script>
+    const parametros = new URLSearchParams(window.location.search);
+    const segmento = parametros.get("segmento");
 
-    const parametros =
-      new URLSearchParams(window.location.search);
+    const resultado = document.getElementById("resultado");
+    const debug = document.getElementById("debug");
 
-    const segmento =
-      parametros.get("segmento");
-
-    document.getElementById("debug").innerText =
-      "Segmento recibido: " + segmento;
-
+    debug.textContent = "Valor recibido: " + segmento;
 
     if (segmento === "CuratedFashionista") {
-
-      document.getElementById("resultado").innerText =
-        "CURATED FASHIONISTA";
-
+      resultado.textContent = "CURATED FASHIONISTA";
+    } else if (segmento === "StylishFollower") {
+      resultado.textContent = "STYLISH FOLLOWER";
+    } else if (segmento === "LuxuryRefined") {
+      resultado.textContent = "LUXURY REFINED";
+    } else {
+      resultado.textContent = "SEGMENTO NO RECONOCIDO";
     }
-
-
-    else if (segmento === "StylishFollower") {
-
-      document.getElementById("resultado").innerText =
-        "STYLISH FOLLOWER";
-
-    }
-
-
-    else if (segmento === "LuxuryRefined") {
-
-      document.getElementById("resultado").innerText =
-        "LUXURY REFINED";
-
-    }
-
-
-    else {
-
-      document.getElementById("resultado").innerText =
-        "SEGMENTO NO RECONOCIDO";
-
-    }
-
   </script>
 
 </body>
-
 </html>
