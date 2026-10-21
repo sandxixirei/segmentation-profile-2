@@ -1,13 +1,194 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prueba versión</title>
+
+  <title>Test Supabase</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 20px;
+    }
+
+    #diagnostico {
+      margin-top: 30px;
+      padding: 20px;
+      background: #eeeeee;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>VERSIÓN 10 PUBLICADA</h1>
-  <p>GitHub está mostrando el index.html nuevo.</p>
+
+  <h1 id="resultado">
+    TEST SUPABASE
+  </h1>
+
+  <p id="detalle">
+    Preparando consulta...
+  </p>
+
+  <div id="diagnostico">
+    JavaScript todavía no iniciado.
+  </div>
+
+
+  <script>
+
+    const SUPABASE_URL =
+      "PEGA_AQUI_TU_PROJECT_URL";
+
+    const SUPABASE_KEY =
+      "PEGA_AQUI_TU_PUBLISHABLE_KEY";
+
+
+    const parametros =
+      new URLSearchParams(window.location.search);
+
+    const responseId =
+      parametros.get("responseid");
+
+
+    const resultado =
+      document.getElementById("resultado");
+
+    const detalle =
+      document.getElementById("detalle");
+
+    const diagnostico =
+      document.getElementById("diagnostico");
+
+
+    diagnostico.textContent =
+      "PASO 1 OK - JavaScript funciona";
+
+
+    async function consultarSupabase() {
+
+      diagnostico.textContent +=
+        "\nPASO 2 - ResponseID: " + responseId;
+
+
+      const url =
+        SUPABASE_URL +
+        "/rest/v1/segment_results" +
+        "?response_id=eq." +
+        encodeURIComponent(responseId) +
+        "&select=response_id,segmento,linea,status";
+
+
+      diagnostico.textContent +=
+        "\nPASO 3 - Consultando Supabase";
+
+
+      try {
+
+        const respuesta =
+          await fetch(url, {
+
+            method: "GET",
+
+            headers: {
+              "apikey": SUPABASE_KEY,
+              "Accept": "application/json"
+            }
+
+          });
+
+
+        diagnostico.textContent +=
+          "\nPASO 4 - HTTP: " +
+          respuesta.status;
+
+
+        const cuerpo =
+          await respuesta.text();
+
+
+        diagnostico.textContent +=
+          "\nPASO 5 - Supabase responde: " +
+          cuerpo;
+
+
+        if (!respuesta.ok) {
+
+          resultado.textContent =
+            "ERROR SUPABASE";
+
+          detalle.textContent =
+            "La consulta ha sido rechazada.";
+
+          return;
+
+        }
+
+
+        const datos =
+          JSON.parse(cuerpo);
+
+
+        if (datos.length === 0) {
+
+          resultado.textContent =
+            "SIN RESULTADO";
+
+          detalle.textContent =
+            "No existe R_TEST_001.";
+
+          return;
+
+        }
+
+
+        const perfil =
+          datos[0];
+
+
+        resultado.textContent =
+          perfil.segmento.toUpperCase();
+
+
+        detalle.textContent =
+          "Línea: " +
+          perfil.linea;
+
+
+        diagnostico.textContent +=
+          "\nPASO 6 OK - Perfil encontrado";
+
+      }
+
+
+      catch (error) {
+
+        resultado.textContent =
+          "ERROR DE CONEXIÓN";
+
+
+        detalle.textContent =
+          error.message;
+
+
+        diagnostico.textContent +=
+          "\nERROR: " +
+          error.message;
+
+      }
+
+    }
+
+
+    consultarSupabase();
+
+  </script>
+
 </body>
+
 </html>
