@@ -5,51 +5,92 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Test Supabase</title>
+  <title>Tu perfil</title>
 
   <style>
     body {
+      margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 20px;
+      background-color: #ffffff;
       color: #111111;
     }
 
-    #resultado {
-      font-size: 48px;
+    .contenedor {
+      min-height: 100vh;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 80px 30px;
+      box-sizing: border-box;
+    }
+
+    .etiqueta {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
       margin-bottom: 20px;
+    }
+
+    #resultado {
+      font-size: 52px;
+      line-height: 1.05;
+      margin: 0 0 25px 0;
+      font-weight: 600;
     }
 
     #detalle {
       font-size: 20px;
+      line-height: 1.5;
     }
 
-    #diagnostico {
-      margin-top: 35px;
-      padding: 20px;
-      background: #eeeeee;
-      border: 1px solid #dddddd;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      font-family: monospace;
+    #cargando {
+      margin-top: 40px;
       font-size: 14px;
-      line-height: 1.5;
+      color: #777777;
+    }
+
+    .puntos {
+      display: inline-block;
+      width: 30px;
+    }
+
+    @media (max-width: 650px) {
+      .contenedor {
+        padding: 55px 25px;
+      }
+
+      #resultado {
+        font-size: 40px;
+      }
+
+      #detalle {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <h1 id="resultado">TEST SUPABASE</h1>
+  <main class="contenedor">
 
-  <p id="detalle">
-    Preparando consulta...
-  </p>
+    <div class="etiqueta">
+      Tu perfil
+    </div>
 
-  <div id="diagnostico">
-    JavaScript todavía no iniciado.
-  </div>
+    <h1 id="resultado">
+      ESTAMOS PREPARANDO TU PERFIL
+    </h1>
+
+    <p id="detalle">
+      Estamos calculando tu resultado.
+    </p>
+
+    <div id="cargando">
+      Por favor, no cierres esta página<span class="puntos">...</span>
+    </div>
+
+  </main>
+
 
   <script>
 
@@ -59,11 +100,13 @@
     const SUPABASE_KEY =
       "sb_publishable_Ot_qmXz2rmPkZik1lotE4A_STBWA9p9";
 
+
     const parametros =
       new URLSearchParams(window.location.search);
 
     const responseId =
       parametros.get("responseid");
+
 
     const resultado =
       document.getElementById("resultado");
@@ -71,27 +114,36 @@
     const detalle =
       document.getElementById("detalle");
 
-    const diagnostico =
-      document.getElementById("diagnostico");
+    const cargando =
+      document.getElementById("cargando");
 
-    diagnostico.textContent =
-      "PASO 1 OK - JavaScript funciona";
 
-    async function consultarSupabase() {
+    const MAX_INTENTOS = 15;
 
-      diagnostico.textContent +=
-        "\nPASO 2 - ResponseID: " + responseId;
+    const INTERVALO = 2000;
+
+    let intentoActual = 0;
+
+
+    async function consultarPerfil() {
+
+      intentoActual++;
+
 
       if (!responseId) {
 
         resultado.textContent =
-          "FALTA RESPONSE ID";
+          "NO SE HA PODIDO CARGAR EL PERFIL";
 
         detalle.textContent =
-          "La URL no contiene responseid.";
+          "No hemos recibido el identificador de la respuesta.";
+
+        cargando.style.display =
+          "none";
 
         return;
       }
+
 
       const url =
         SUPABASE_URL +
@@ -100,102 +152,104 @@
         encodeURIComponent(responseId) +
         "&select=qualtrics_key,segmento,linea,status";
 
-      diagnostico.textContent +=
-        "\nPASO 3 - Consultando Supabase";
-
-      diagnostico.textContent +=
-        "\nURL API: " + url;
 
       try {
 
         const respuesta =
-          await fetch(url, {
-            method: "GET",
-            headers: {
-              "apikey": SUPABASE_KEY,
-              "Accept": "application/json"
+          await fetch(
+            url,
+            {
+              method: "GET",
+
+              headers: {
+                "apikey": SUPABASE_KEY,
+                "Accept": "application/json"
+              }
             }
-          });
+          );
 
-        diagnostico.textContent +=
-          "\nPASO 4 - HTTP: " +
-          respuesta.status;
-
-        const cuerpo =
-          await respuesta.text();
-
-        diagnostico.textContent +=
-          "\nPASO 5 - Supabase responde: " +
-          cuerpo;
 
         if (!respuesta.ok) {
-
-          resultado.textContent =
-            "ERROR SUPABASE";
-
-          detalle.textContent =
-            "La consulta ha sido rechazada.";
-
-          return;
+          throw new Error(
+            "Error HTTP " +
+            respuesta.status
+          );
         }
+
 
         const datos =
-          JSON.parse(cuerpo);
+          await respuesta.json();
 
-        if (!Array.isArray(datos)) {
 
-          resultado.textContent =
-            "RESPUESTA NO VÁLIDA";
+        if (
+          datos.length > 0 &&
+          datos[0].status === "READY"
+        ) {
 
-          detalle.textContent =
-            "Supabase no ha devuelto una lista.";
-
-          return;
-        }
-
-        if (datos.length === 0) {
-
-          resultado.textContent =
-            "SIN RESULTADO";
-
-          detalle.textContent =
-            "No existe un resultado READY para " +
-            responseId +
-            ".";
+          mostrarPerfil(datos[0]);
 
           return;
         }
 
-        const perfil =
-          datos[0];
 
-        resultado.textContent =
-          String(perfil.segmento).toUpperCase();
-
-        detalle.textContent =
-          "Línea: " +
-          perfil.linea;
-
-        diagnostico.textContent +=
-          "\nPASO 6 OK - Perfil encontrado";
+        reintentar();
 
       }
 
       catch (error) {
 
-        resultado.textContent =
-          "ERROR DE CONEXIÓN";
+        console.error(error);
 
-        detalle.textContent =
-          error.message;
+        reintentar();
 
-        diagnostico.textContent +=
-          "\nERROR: " +
-          error.message;
       }
+
     }
 
-    consultarSupabase();
+
+    function reintentar() {
+
+      if (intentoActual < MAX_INTENTOS) {
+
+        setTimeout(
+          consultarPerfil,
+          INTERVALO
+        );
+
+        return;
+      }
+
+
+      resultado.textContent =
+        "TU PERFIL ESTÁ CASI LISTO";
+
+      detalle.textContent =
+        "No hemos podido cargar el resultado automáticamente.";
+
+      cargando.textContent =
+        "Puedes actualizar esta página para consultar tu perfil.";
+
+    }
+
+
+    function mostrarPerfil(perfil) {
+
+      cargando.style.display =
+        "none";
+
+
+      resultado.textContent =
+        String(perfil.segmento).toUpperCase();
+
+
+      detalle.textContent =
+        "Línea: " +
+        perfil.linea;
+
+    }
+
+
+    consultarPerfil();
 
   </script>
 
