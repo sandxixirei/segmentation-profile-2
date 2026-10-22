@@ -95,10 +95,10 @@
 
       const url =
         SUPABASE_URL +
-        "/rest/v1/segment_results" +
-        "?response_id=eq." +
+        "/rest/v1/segment_results_v2" +
+        "?qualtrics_key=eq." +
         encodeURIComponent(responseId) +
-        "&select=response_id,segmento,linea,status";
+        "&select=qualtrics_key,segmento,linea,status";
 
       diagnostico.textContent +=
         "\nPASO 3 - Consultando Supabase";
